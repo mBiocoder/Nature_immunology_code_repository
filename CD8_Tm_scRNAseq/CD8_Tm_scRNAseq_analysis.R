@@ -115,14 +115,6 @@ col.ls <- as.vector(col.ls$stallion)
 p3 <- DimPlot(combined.object, reduction = "umap", group.by = "RNA_snn_res.0.8",pt.size=0.1,label=TRUE,cols=col.ls) + theme_custom + ggtitle("leiden clusters")
 ggsave("../scripts/figures/25-01-23/Leiden.pdf",p3)
 
-# Identify the dead-cells
-mito_genes <- rownames(combined.object)[grep(pattern = "^MT-",rownames(combined.object))]
-
-p4<-DotPlot(object = combined.object, features = mito_genes,col.min = -1,col.max = 1) + 
-  theme_custom + theme(axis.text.x = element_text(size = 8.8, color = "black",angle = 90)) + 
-  scale_x_discrete(name ="Mitochondrial genes")+scale_y_discrete(name ="Leiden clusters")
-
-
 # Doublet detection and removal
 sweep.res <- paramSweep_v3(combined.object, PCs = 1:npca, sct = FALSE)
 sweep.stats <- summarizeSweep(sweep.res, GT = FALSE)
