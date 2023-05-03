@@ -100,13 +100,13 @@ npca <- which(cumsum(varExplained)>var_cutoff)[1]
 
 combined.object <- RunUMAP(combined.object, reduction = "pca", dims = 1:npca,
                            seed.use = 1, reduction.name = "umap",umap.method="uwot")
-p2<-DimPlot(combined.object, reduction = "umap", group.by = "condition",pt.size=0.1) + theme_custom + ggtitle("UMAP")
-p2
+p1<-DimPlot(combined.object, reduction = "umap", group.by = "condition",pt.size=0.1) + theme_custom + ggtitle("UMAP")
+p1
 
 combined.object <- RunTSNE(combined.object, reduction = "pca", dims = 1:npca,
                            seed.use = 1, reduction.name = "tsne", tsne.method = "Rtsne")
-p0t<-DimPlot(combined.object, reduction = "tsne", group.by = "condition",pt.size=0.1) + theme_custom + ggtitle("tSNE")
-p0t
+p2<-DimPlot(combined.object, reduction = "tsne", group.by = "condition",pt.size=0.1) + theme_custom + ggtitle("tSNE")
+p2
 
 combined.object <- FindNeighbors(combined.object, reduction = "pca", k.param = 20, dims = 1:npca, do.plot = F)
 combined.object<- FindClusters(combined.object, algorithm = 4, random.seed = 0)
@@ -134,13 +134,13 @@ combined.object <- doubletFinder_v3(seu = combined.object,
                                  nExp = nExp.poi.adj)
 DF.name = colnames(combined.object@meta.data)[grepl("DF.classification", colnames(combined.object@meta.data))]
 
-p8 <- DimPlot(combined.object, reduction = "umap",group.by = DF.name,pt.size=0.1) + theme_custom + ggtitle("Doublets")
-p8
-ggsave("./figures/doubletfinder_UMAP.pdf",p8, units = "cm", width = 15, height = 15)
+p4 <- DimPlot(combined.object, reduction = "umap",group.by = DF.name,pt.size=0.1) + theme_custom + ggtitle("Doublets")
+p4
+ggsave("./figures/doubletfinder_UMAP.pdf",p4, units = "cm", width = 15, height = 15)
 
-p9 <- DimPlot(combined.object, reduction = "tsne",group.by = DF.name,pt.size=0.1) + theme_custom + ggtitle("Doublets")
-p9
-ggsave("./figures/doubletfinder_tSNE.pdf",p9, units = "cm", width = 15, height = 15)
+p5 <- DimPlot(combined.object, reduction = "tsne",group.by = DF.name,pt.size=0.1) + theme_custom + ggtitle("Doublets")
+p5
+ggsave("./figures/doubletfinder_tSNE.pdf",p5, units = "cm", width = 15, height = 15)
 
 combined.object = combined.object[, combined.object@meta.data[, DF.name] == "Singlet"]
 
@@ -156,24 +156,24 @@ combined.object.final <- RunUMAP(combined.object, reduction = "pca", dims = 1:24
                                         reduction.name = "umap",umap.method="uwot")
 
 mycolors = c(brewer.pal(name="Dark2", n = 8), brewer.pal(name="Paired", n = 6)) #concat two color palettes for more than 12 colors
-p10<-DimPlot(combined.object.final, reduction = "umap", 
+p6<-DimPlot(combined.object.final, reduction = "umap", 
             group.by = "orig.ident",pt.size=0.1) + theme_custom + ggtitle("UMAP")
-p10
-ggsave("./figures/UMAP.pdf",p10, units = "cm", width = 15, height = 15)
+p6
+ggsave("./figures/UMAP.pdf",p6, units = "cm", width = 15, height = 15)
 
-p11<-DimPlot(combined.object.final, reduction = "tsne", 
+p7<-DimPlot(combined.object.final, reduction = "tsne", 
              group.by = "orig.ident",pt.size=0.1) + theme_custom + ggtitle("tSNE")
-p11
-ggsave("./figures/tSNE.pdf",p11, units = "cm", width = 15, height = 15)
+p7
+ggsave("./figures/tSNE.pdf",p7, units = "cm", width = 15, height = 15)
 
 #Plot leiden clusters
-p12 <- DimPlot(combined.object.final, reduction = "umap", pt.size=0.1, label = TRUE ) + theme_custom + ggtitle("UMAP")
-p12
-ggsave("./figures/UMAP_leiden.pdf",p12, units = "cm", width = 15, height = 15)
+p8 <- DimPlot(combined.object.final, reduction = "umap", pt.size=0.1, label = TRUE ) + theme_custom + ggtitle("UMAP")
+p8
+ggsave("./figures/UMAP_leiden.pdf",p8, units = "cm", width = 15, height = 15)
 
-p13 <- DimPlot(combined.object.final, reduction = "tsne", pt.size=0.1, cols = mycolors) + theme_custom + ggtitle("tSNE")
-p13
-ggsave("./figures/tSNE_leiden.pdf",p13, units = "cm", width = 15, height = 15)
+p9 <- DimPlot(combined.object.final, reduction = "tsne", pt.size=0.1, cols = mycolors) + theme_custom + ggtitle("tSNE")
+p9
+ggsave("./figures/tSNE_leiden.pdf",p9, units = "cm", width = 15, height = 15)
 
 #Save and load object
 saveRDS(combined.object.final,"./output_files/")
@@ -193,9 +193,9 @@ a1_low <- a1[a1$orig.ident=="low salt",]
 a1_high <- a1[a1$orig.ident=="high salt",]
 df= cbind(a1_high$Freq,a1_low$Freq)
 
-p3<-barplot(t(df_rel_freq),legend = c("High Salt","Low Salt"),col=c("brown1","#30D5C8"),ylab="Percentage of cells (split by high and low salt) per cluster", xlab="Leiden clusters",ylim=c(0,40),args.legend = list(bty = "n",x = "topright"),bg = 'transparent', space= 0.5, width = c(0.3,0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3)) 
-text(p3,apply(df, 1, sum)+1.5 , labels = cell_numbers)
-ggsave("./figures/stacked_barplot.pdf",text(p3,apply(df, 1, sum)+1.5 , labels = cell_numbers), units = "cm", width = 15, height = 15)
+p10 <-barplot(t(df_rel_freq),legend = c("High Salt","Low Salt"),col=c("brown1","#30D5C8"),ylab="Percentage of cells (split by high and low salt) per cluster", xlab="Leiden clusters",ylim=c(0,40),args.legend = list(bty = "n",x = "topright"),bg = 'transparent', space= 0.5, width = c(0.3,0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3)) 
+text(p10,apply(df, 1, sum)+1.5 , labels = cell_numbers)
+ggsave("./figures/stacked_barplot.pdf",text(p10,apply(df, 1, sum)+1.5 , labels = cell_numbers), units = "cm", width = 15, height = 15)
 dev.off()
 
 
@@ -266,19 +266,19 @@ up_markers <- markers_high_vs_low[markers_high_vs_low$p_val_adj < 0.05 & markers
 down_markers <- markers_high_vs_low[markers_high_vs_low$p_val_adj < 0.05 & markers_high_vs_low$avg_log2FC < 0, ] %>% arrange(avg_log2FC) %>% slice(1:20) #290
 
 # Heatmaps (up -and downregulated genes)
-p16_a <- DoHeatmap(combined.object.final, group.by = "orig.ident", features = rownames(up_markers))  + scale_fill_gradientn(colors = c("blue", "white", "red"))
-p16_a
-ggsave("./figures/Heatmap_per_salt_identity_upregulated.pdf",p16_a, units = "cm", width = 10, height = 15)
+p11 <- DoHeatmap(combined.object.final, group.by = "orig.ident", features = rownames(up_markers))  + scale_fill_gradientn(colors = c("blue", "white", "red"))
+p11
+ggsave("./figures/Heatmap_per_salt_identity_upregulated.pdf",p11, units = "cm", width = 10, height = 15)
 
-p16_b <- DoHeatmap(combined.object.final, group.by = "orig.ident", slot= "counts", features = rownames(down_markers))  + scale_fill_gradientn(colors = c("blue", "white", "red"))
-p16_b
-ggsave("./figures/Heatmap_per_salt_identity_downregulated.pdf",p16_b, units = "cm", width = 10, height = 15)
+p12 <- DoHeatmap(combined.object.final, group.by = "orig.ident", slot= "counts", features = rownames(down_markers))  + scale_fill_gradientn(colors = c("blue", "white", "red"))
+p12
+ggsave("./figures/Heatmap_per_salt_identity_downregulated.pdf",p12, units = "cm", width = 10, height = 15)
 
 
 all_markers <- c(rownames(up_markers), rownames(down_markers))
-p16_c <- DoHeatmap(combined.object.final, group.by = "orig.ident", slot= "counts", features = all_markers)  + scale_fill_gradientn(colors = c("blue", "white", "red"))
-p16_c
-ggsave("./figures/Heatmap_per_salt_identity_up_and_downregulated.pdf",p16_c, units = "cm", width = 10, height = 15)
+p13 <- DoHeatmap(combined.object.final, group.by = "orig.ident", slot= "counts", features = all_markers)  + scale_fill_gradientn(colors = c("blue", "white", "red"))
+p13
+ggsave("./figures/Heatmap_per_salt_identity_up_and_downregulated.pdf",p13, units = "cm", width = 10, height = 15)
 
 
 # Enrichment analysis high vs. low salt
@@ -360,12 +360,12 @@ write.table(enrich_GO_up_res, file="./output_files/enrich_clusters_GO_up_res.tsv
 write.table(enrich_GO_dn_res, file="./output_files/enrich_clusters_GO_dn_res.tsv", quote=FALSE, sep='\t', col.names = NA)
 
 #Enrichment dotplot for only upregulated genes
-p21 <- dotplot(enrich_GO_up_res, showCategory=15) + ggtitle("Overrepresentation: GO term (Biological process) \n for upregulated genes ([2,3,10,11] vs. rest)")
-ggsave("./figures/Enrichment_clusters_for_upreg_signif_genes_BP_GO.pdf",p21, units = "cm", width = 17, height = 20)
+p14 <- dotplot(enrich_GO_up_res, showCategory=15) + ggtitle("Overrepresentation: GO term (Biological process) \n for upregulated genes ([2,3,10,11] vs. rest)")
+ggsave("./figures/Enrichment_clusters_for_upreg_signif_genes_BP_GO.pdf",p14, units = "cm", width = 17, height = 20)
 
 #Enrichment dotplot for only downregulated genes
-p22 <- dotplot(enrich_GO_dn_res, showCategory=15) + ggtitle("Overrepresentation: GO term (Biological process) \n for downregulated genes ([2,3,10,11] vs. rest)")
-ggsave("./figures/Enrichment_clusters_for_downreg_signif_genes_BP_GO.pdf",p22, units = "cm", width = 17, height = 20)
+p15 <- dotplot(enrich_GO_dn_res, showCategory=15) + ggtitle("Overrepresentation: GO term (Biological process) \n for downregulated genes ([2,3,10,11] vs. rest)")
+ggsave("./figures/Enrichment_clusters_for_downreg_signif_genes_BP_GO.pdf",p15, units = "cm", width = 17, height = 20)
 
 
 #Heatmap for DEG for clusters [2,3,10,11] vs. rest
@@ -406,11 +406,11 @@ combined.object.final <- AddModuleScore(combined.object.final,
                                         name="GO_Cell_death")
 #Plot scores
 head(combined.object.final[[]]) # look at metadata
-p19 <- FeaturePlot(combined.object.final,
+p16 <- FeaturePlot(combined.object.final,
             features = "GO_Cell_death1", label = TRUE, repel = TRUE, pt.size = 0.6) +
   scale_colour_gradientn(colours = rev(brewer.pal(n = 11, name = "RdBu")))
-p19
-ggsave("./figures/UMAP_GO_celldeath_geneset.pdf",p19, units = "cm", width = 10, height = 10)
+p16
+ggsave("./figures/UMAP_GO_celldeath_geneset.pdf",p16, units = "cm", width = 10, height = 10)
 
 
 #Check Cytotoxicity (Positive regulation of T cell mediated cytotoxicity: GO:0001916, http://amigo.geneontology.org/amigo/term/GO:0001916)
@@ -419,7 +419,7 @@ combined.object.final <- AddModuleScore(combined.object.final,
                                         features = list(cytotoxicity_GO_genes),
                                         name="GO_cytotoxicity")
 
-p22 <- plot_grid(
+p17 <- plot_grid(
   FeaturePlot(object = combined.object.final, features = "GO_cytotoxicity1", 
               pt.size = 0.4, cols = c("blue", "red"), 
               combine = TRUE) +  scale_colour_gradientn(colours = rev(brewer.pal(n = 11, name = "RdBu"))),
@@ -427,14 +427,14 @@ p22 <- plot_grid(
              group.by = "orig.ident") +  scale_colour_gradientn(colours = rev(brewer.pal(n = 11, name = "RdBu"))) 
              + stat_compare_means(method.args = list(alternative = "two.sided")) + geom_boxplot(width=0.8, size=0.5))
 
-p22
-ggsave("./figures/Feature_and_Violinplot_Cytotoxicity_high_vs_low_salt.pdf",p22, units = "cm", width = 27, height = 15)
+p17
+ggsave("./figures/Feature_and_Violinplot_Cytotoxicity_high_vs_low_salt.pdf",p17, units = "cm", width = 27, height = 15)
 
 
-p22_leiden <- VlnPlot(object = combined.object.final, features = "GO_cytotoxicity1", 
+p17_leiden <- VlnPlot(object = combined.object.final, features = "GO_cytotoxicity1", 
         group.by = "seurat_clusters") +  scale_colour_gradientn(colours = rev(brewer.pal(n = 11, name = "RdBu")))  + geom_boxplot(width=0.8, size=0.5)
-p22_leiden
-ggsave("./figures/Violinplot_Cytotoxicity_leiden.pdf",p22_leiden, units = "cm", width = 25, height = 15)
+p17_leiden
+ggsave("./figures/Violinplot_Cytotoxicity_leiden.pdf",p17_leiden, units = "cm", width = 25, height = 15)
 
 
 #Check Activation (Positive regulation of T cell activation: GO:0050870, http://amigo.geneontology.org/amigo/term/GO:0050870)
@@ -443,7 +443,7 @@ combined.object.final <- AddModuleScore(combined.object.final,
                                         features = list(activation_GO_genes),
                                         name="GO_activation")
 
-p23 <- plot_grid(
+p18 <- plot_grid(
   FeaturePlot(object = combined.object.final, features = "GO_activation1", 
               pt.size = 0.4, cols = c("blue", "red"), 
               combine = TRUE) +  scale_colour_gradientn(colours = rev(brewer.pal(n = 11, name = "RdBu"))),
@@ -451,8 +451,8 @@ p23 <- plot_grid(
           group.by = "orig.ident") +  scale_colour_gradientn(colours = rev(brewer.pal(n = 11, name = "RdBu"))) 
   + stat_compare_means(method.args = list(alternative = "two.sided")) + geom_boxplot(width=0.8, size=0.5) )
 
-p23
-ggsave("./figures/Feature_and_Violinplot_Activation_high_vs_low_salt.pdf",p23, units = "cm", width = 27, height = 15)
+p18
+ggsave("./figures/Feature_and_Violinplot_Activation_high_vs_low_salt.pdf",p18, units = "cm", width = 27, height = 15)
 
 #Get exact p-value by manually running wilcox two-sided test again
 combined.object.final_sub <- subset(combined.object.final, idents = c("high salt", "low salt"))
@@ -461,10 +461,10 @@ Activation_test_result <- wilcox.test(Activation_sub ~ combined.object.final_sub
 Activation_p_value <- Activation_test_result$p.value 
 Activation_p_value #1.971527e-151
 
-p23_leiden <- VlnPlot(object = combined.object.final, features = "GO_activation1", 
+p18_leiden <- VlnPlot(object = combined.object.final, features = "GO_activation1", 
                       group.by = "seurat_clusters") +  scale_colour_gradientn(colours = rev(brewer.pal(n = 11, name = "RdBu")))  + geom_boxplot(width=0.8, size=0.5)
-p23_leiden
-ggsave("./figures/Violinplot_Activation_leiden.pdf",p23_leiden, units = "cm", width = 25, height = 15)
+p18_leiden
+ggsave("./figures/Violinplot_Activation_leiden.pdf",p18_leiden, units = "cm", width = 25, height = 15)
 
 
 #Check Effector function
@@ -473,7 +473,7 @@ combined.object.final <- AddModuleScore(combined.object.final,
                                         features = list(effctor_GO_genes),
                                         name="GO_effector_function")
 
-p24 <- plot_grid(
+p19 <- plot_grid(
   FeaturePlot(object = combined.object.final, features = "GO_effector_function1", 
               pt.size = 0.4, cols = c("blue", "red"), 
               combine = TRUE) +  scale_colour_gradientn(colours = rev(brewer.pal(n = 11, name = "RdBu"))),
@@ -481,14 +481,14 @@ p24 <- plot_grid(
           group.by = "orig.ident") +  scale_colour_gradientn(colours = rev(brewer.pal(n = 11, name = "RdBu"))) 
   + stat_compare_means(method.args = list(alternative = "two.sided")) + geom_boxplot(width=0.8, size=0.5) )
 
-p24
-ggsave("./figures/Feature_and_Violinplot_Effector_function_high_vs_low_salt.pdf",p24, units = "cm", width = 27, height = 15)
+p19
+ggsave("./figures/Feature_and_Violinplot_Effector_function_high_vs_low_salt.pdf",p19, units = "cm", width = 27, height = 15)
 
 
-p24_leiden <- VlnPlot(object = combined.object.final, features = "GO_effector_function1", 
+p19_leiden <- VlnPlot(object = combined.object.final, features = "GO_effector_function1", 
                       group.by = "seurat_clusters") +  scale_colour_gradientn(colours = rev(brewer.pal(n = 11, name = "RdBu")))  + geom_boxplot(width=0.8, size=0.5)
-p24_leiden
-ggsave("./figures/Violinplot_Effector_function_leiden.pdf",p24_leiden, units = "cm", width = 25, height = 15)
+p19_leiden
+ggsave("./figures/Violinplot_Effector_function_leiden.pdf",p19_leiden, units = "cm", width = 25, height = 15)
 
 
 #Check TCR signalling function (GO:0050862)
@@ -497,7 +497,7 @@ combined.object.final <- AddModuleScore(combined.object.final,
                                         features = list(TCR_sig_GO_genes),
                                         name="GO_TCR_signalling")
 
-p25 <- plot_grid(
+p20 <- plot_grid(
   FeaturePlot(object = combined.object.final, features = "GO_TCR_signalling1", 
               pt.size = 0.4, cols = c("blue", "red"), 
               combine = TRUE) +  scale_colour_gradientn(colours = rev(brewer.pal(n = 11, name = "RdBu"))),
@@ -505,8 +505,8 @@ p25 <- plot_grid(
           group.by = "orig.ident") +  scale_colour_gradientn(colours = rev(brewer.pal(n = 11, name = "RdBu"))) 
   + stat_compare_means(method.args = list(alternative = "two.sided")) + geom_boxplot(width=0.8, size=0.5) )
 
-p25
-ggsave("./figures/Feature_and_Violinplot_TCR_signalling_high_vs_low_salt.pdf",p25, units = "cm", width = 27, height = 15)
+p20
+ggsave("./figures/Feature_and_Violinplot_TCR_signalling_high_vs_low_salt.pdf",p20, units = "cm", width = 27, height = 15)
 
 
 #Get exact p-value by manually running wilcox twosided test again
@@ -516,10 +516,10 @@ TCRsig_test_result <- wilcox.test(TCRsig_sub ~ combined.object.final_sub$orig.id
 TCRsig_p_value <- TCRsig_test_result$p.value 
 TCRsig_p_value #3.53706e-11
 
-p25_leiden <- VlnPlot(object = combined.object.final, features = "GO_TCR_signalling1", 
+p20_leiden <- VlnPlot(object = combined.object.final, features = "GO_TCR_signalling1", 
                       group.by = "seurat_clusters") +  scale_colour_gradientn(colours = rev(brewer.pal(n = 11, name = "RdBu")))  + geom_boxplot(width=0.8, size=0.5)
-p25_leiden
-ggsave("./figures/Violinplot_TCR_signalling_leiden.pdf",p25_leiden, units = "cm", width = 25, height = 15)
+p20_leiden
+ggsave("./figures/Violinplot_TCR_signalling_leiden.pdf",p20_leiden, units = "cm", width = 25, height = 15)
 
 
 #Check stess activated MAPK signalling function (GO:0051403)
@@ -528,7 +528,7 @@ combined.object.final <- AddModuleScore(combined.object.final,
                                         features = list(MAPK_GO_genes),
                                         name="GO_Stress_activated_MAPK_cascade")
 
-p26 <- plot_grid(
+p21 <- plot_grid(
   FeaturePlot(object = combined.object.final, features = "GO_Stress_activated_MAPK_cascade1", 
               pt.size = 0.4, cols = c("blue", "red"), 
               combine = TRUE) +  scale_colour_gradientn(colours = rev(brewer.pal(n = 11, name = "RdBu"))),
@@ -536,8 +536,8 @@ p26 <- plot_grid(
           group.by = "orig.ident") +  scale_colour_gradientn(colours = rev(brewer.pal(n = 11, name = "RdBu"))) 
   + stat_compare_means(method.args = list(alternative = "two.sided")) + geom_boxplot(width=0.8, size=0.5) )
 
-p26
-ggsave("./figures/Feature_and_Violinplot_MAPK_cascade_high_vs_low_salt.pdf",p26, units = "cm", width = 27, height = 15)
+p21
+ggsave("./figures/Feature_and_Violinplot_MAPK_cascade_high_vs_low_salt.pdf",p21, units = "cm", width = 27, height = 15)
 
 #Get exact p-value by manually running wilcox twosided test again
 combined.object.final_sub <- subset(combined.object.final, idents = c("high salt", "low salt"))
@@ -545,10 +545,10 @@ MAPK_sub <- combined.object.final_sub@meta.data$GO_Stress_activated_MAPK_cascade
 MAPK_test_result <- wilcox.test(MAPK_sub ~ combined.object.final_sub$orig.ident, alternative = "two.sided")
 MAPK_p_value <- MAPK_test_result$p.value #9.779305e-157
 
-p26_leiden <- VlnPlot(object = combined.object.final, features = "GO_Stress_activated_MAPK_cascade1", 
+p21_leiden <- VlnPlot(object = combined.object.final, features = "GO_Stress_activated_MAPK_cascade1", 
                       group.by = "seurat_clusters") +  scale_colour_gradientn(colours = rev(brewer.pal(n = 11, name = "RdBu")))  + geom_boxplot(width=0.8, size=0.5)
-p26_leiden
-ggsave("./figures/Violinplot_MAPK_cascade_leiden.pdf",p26_leiden, units = "cm", width = 25, height = 15)
+p21_leiden
+ggsave("./figures/Violinplot_MAPK_cascade_leiden.pdf",p21_leiden, units = "cm", width = 25, height = 15)
 
 
 #Check positive regulation of calcineurin-NFAT signaling cascade (GO:0070886)
@@ -557,7 +557,7 @@ combined.object.final <- AddModuleScore(combined.object.final,
                                         features = list(NFAT_GO_genes),
                                         name="GO_NFAT_signalling")
 
-p27 <- plot_grid(
+p22 <- plot_grid(
   FeaturePlot(object = combined.object.final, features = "GO_NFAT_signalling1", 
               pt.size = 0.4, cols = c("blue", "red"), 
               combine = TRUE) +  scale_colour_gradientn(colours = rev(brewer.pal(n = 11, name = "RdBu"))),
@@ -565,8 +565,8 @@ p27 <- plot_grid(
           group.by = "orig.ident") +  scale_colour_gradientn(colours = rev(brewer.pal(n = 11, name = "RdBu"))) 
   + stat_compare_means(method.args = list(alternative = "two.sided")) + geom_boxplot(width=0.8, size=0.5) )
 
-p27
-ggsave("./figures/MA_Feature_and_Violinplot_NFAT_signalling_high_vs_low_salt.pdf",p27, units = "cm", width = 27, height = 15)
+p22
+ggsave("./figures/MA_Feature_and_Violinplot_NFAT_signalling_high_vs_low_salt.pdf",p22, units = "cm", width = 27, height = 15)
 
 
 #Get exact p-value by manually running wilcox twosided test again
@@ -576,10 +576,10 @@ NFAT_test_result <- wilcox.test(NFAT_sub ~ combined.object.final_sub$orig.ident,
 NFAT_p_value <- NFAT_test_result$p.value 
 NFAT_p_value #1.887247e-223
 
-p27_leiden <- VlnPlot(object = combined.object.final, features = "GO_NFAT_signalling1", 
+p22_leiden <- VlnPlot(object = combined.object.final, features = "GO_NFAT_signalling1", 
                       group.by = "seurat_clusters") +  scale_colour_gradientn(colours = rev(brewer.pal(n = 11, name = "RdBu")))  + geom_boxplot(width=0.8, size=0.5)
-p27_leiden
-ggsave("./figures/MA_Violinplot_NFAT_cascade_leiden.pdf",p27_leiden, units = "cm", width = 25, height = 15)
+p22_leiden
+ggsave("./figures/MA_Violinplot_NFAT_cascade_leiden.pdf",p22_leiden, units = "cm", width = 25, height = 15)
 
 
 #Check TRM signature genes
@@ -588,7 +588,7 @@ combined.object.final <- AddModuleScore(combined.object.final,
                                         features = list(TRM_GO_genes),
                                         name="GO_TRM")
 
-p28 <- plot_grid(
+p23 <- plot_grid(
   FeaturePlot(object = combined.object.final, features = "GO_TRM1", 
               pt.size = 0.4, cols = c("blue", "red"), 
               combine = TRUE) +  scale_colour_gradientn(colours = rev(brewer.pal(n = 11, name = "RdBu"))),
@@ -596,8 +596,8 @@ p28 <- plot_grid(
           group.by = "orig.ident") +  scale_colour_gradientn(colours = rev(brewer.pal(n = 11, name = "RdBu"))) 
   + stat_compare_means(method.args = list(alternative = "two.sided")) + geom_boxplot(width=0.8, size=0.5) )
 
-p28
-ggsave("./figures/MA_Feature_and_Violinplot_TRM_high_vs_low_salt.pdf",p28, units = "cm", width = 27, height = 15)
+p23
+ggsave("./figures/MA_Feature_and_Violinplot_TRM_high_vs_low_salt.pdf",p23, units = "cm", width = 27, height = 15)
 
 
 #Get exact p-value by manually running wilcox twosided test again
@@ -607,10 +607,10 @@ TRM_test_result <- wilcox.test(TRM_sub ~ combined.object.final_sub$orig.ident, a
 TRM_p_value <- TRM_test_result$p.value 
 TRM_p_value #6.731356e-57
 
-p28_leiden <- VlnPlot(object = combined.object.final, features = "GO_TRM1", 
+p23_leiden <- VlnPlot(object = combined.object.final, features = "GO_TRM1", 
                       group.by = "seurat_clusters") +  scale_colour_gradientn(colours = rev(brewer.pal(n = 11, name = "RdBu")))  + geom_boxplot(width=0.8, size=0.5)
-p28_leiden
-ggsave("./figures/MA_Violinplot_TRM_leiden.pdf",p28_leiden, units = "cm", width = 25, height = 15)
+p23_leiden
+ggsave("./figures/MA_Violinplot_TRM_leiden.pdf",p23_leiden, units = "cm", width = 25, height = 15)
 
 
 #Check Exhaustion geneset
@@ -619,7 +619,7 @@ combined.object.final <- AddModuleScore(combined.object.final,
                                         features = list(Exhaustion_GO_genes),
                                         name="Exhaustion")
 
-p29 <- plot_grid(
+p24 <- plot_grid(
   FeaturePlot(object = combined.object.final, features = "Exhaustion1", 
               pt.size = 0.4, cols = c("blue", "red"), 
               combine = TRUE) +  scale_colour_gradientn(colours = rev(brewer.pal(n = 11, name = "RdBu"))),
@@ -627,8 +627,8 @@ p29 <- plot_grid(
           group.by = "orig.ident") +  scale_colour_gradientn(colours = rev(brewer.pal(n = 11, name = "RdBu"))) 
   + stat_compare_means(method.args = list(alternative = "two.sided")) + geom_boxplot(width=0.8, size=0.5) )
 
-p29
-ggsave("./figures/MA_Feature_and_Violinplot_Exhaustion_high_vs_low_salt.pdf",p29, units = "cm", width = 27, height = 15)
+p24
+ggsave("./figures/MA_Feature_and_Violinplot_Exhaustion_high_vs_low_salt.pdf",p24, units = "cm", width = 27, height = 15)
 
 
 #Get exact p-value by manually running wilcox twosided test again
@@ -638,40 +638,40 @@ Exhaustion_test_result <- wilcox.test(Exhaustion_sub ~ combined.object.final_sub
 Exhaustion_p_value <- Exhaustion_test_result$p.value 
 Exhaustion_p_value #7.609517e-76
 
-p29_leiden <- VlnPlot(object = combined.object.final, features = "Exhaustion1", 
+p24_leiden <- VlnPlot(object = combined.object.final, features = "Exhaustion1", 
                       group.by = "seurat_clusters") +  scale_colour_gradientn(colours = rev(brewer.pal(n = 11, name = "RdBu")))  + geom_boxplot(width=0.8, size=0.5)
-p29_leiden
-ggsave("./figures/MA_Violinplot_Exhaustion_leiden.pdf",p28_leiden, units = "cm", width = 25, height = 15)
+p24_leiden
+ggsave("./figures/MA_Violinplot_Exhaustion_leiden.pdf",p24_leiden, units = "cm", width = 25, height = 15)
 
 
 #Make violinplot and UMAP for specific genes of interest (ICOS, PDCD1, CTLA4, ITGAE)
 features <- c("ICOS", "PDCD1", "CTLA4", "ITGAE")
 
-p30 <- FeaturePlot(object = combined.object.final, features = features) 
-p30
-ggsave("./figures/MA_Featureplot_genes_of_interest_high_vs_low_salt.pdf",p30, units = "cm", width = 20, height = 15)
+p25 <- FeaturePlot(object = combined.object.final, features = features) 
+p25
+ggsave("./figures/MA_Featureplot_genes_of_interest_high_vs_low_salt.pdf",p25, units = "cm", width = 20, height = 15)
 
 #ICOS
-p31 <- VlnPlot(object = combined.object.final, features = c("ICOS"), 
+p26 <- VlnPlot(object = combined.object.final, features = c("ICOS"), 
           group.by = "orig.ident") +  scale_colour_gradientn(colours = rev(brewer.pal(n = 11, name = "RdBu"))) + stat_compare_means(method.args = list(alternative = "two.sided"))
-p31
-ggsave("./figures/MA_Violinplot_ICOS_gene_high_vs_low_salt.pdf",p31, units = "cm", width = 13, height = 13)
+p26
+ggsave("./figures/MA_Violinplot_ICOS_gene_high_vs_low_salt.pdf",p26, units = "cm", width = 13, height = 13)
 
 #PDCD1
-p32 <- VlnPlot(object = combined.object.final, features = c("PDCD1"), 
+p27 <- VlnPlot(object = combined.object.final, features = c("PDCD1"), 
                group.by = "orig.ident") +  scale_colour_gradientn(colours = rev(brewer.pal(n = 11, name = "RdBu"))) + stat_compare_means(method.args = list(alternative = "two.sided"))
-p32
-ggsave("./figures/MA_Violinplot_PDCD1_gene_high_vs_low_salt.pdf",p32, units = "cm", width = 13, height = 13)
+p27
+ggsave("./figures/MA_Violinplot_PDCD1_gene_high_vs_low_salt.pdf",p27, units = "cm", width = 13, height = 13)
 
 #CTLA4
-p33 <- VlnPlot(object = combined.object.final, features = c("CTLA4"), 
+p28 <- VlnPlot(object = combined.object.final, features = c("CTLA4"), 
                group.by = "orig.ident") +  scale_colour_gradientn(colours = rev(brewer.pal(n = 11, name = "RdBu"))) + stat_compare_means(method.args = list(alternative = "two.sided"))
-p33
-ggsave("./figures/MA_Violinplot_CTLA4_gene_high_vs_low_salt.pdf",p33, units = "cm", width = 13, height = 13)
+p28
+ggsave("./figures/MA_Violinplot_CTLA4_gene_high_vs_low_salt.pdf",p28, units = "cm", width = 13, height = 13)
 
 
 #ITGAE
-p34 <- VlnPlot(object = combined.object.final, features = c("ITGAE"), 
+p29 <- VlnPlot(object = combined.object.final, features = c("ITGAE"), 
                group.by = "orig.ident") +  scale_colour_gradientn(colours = rev(brewer.pal(n = 11, name = "RdBu"))) + stat_compare_means(method.args = list(alternative = "two.sided"))
-p34
-ggsave("./figures/MA_Violinplot_ITGAE_gene_high_vs_low_salt.pdf",p34, units = "cm", width = 13, height = 13)
+p29
+ggsave("./figures/MA_Violinplot_ITGAE_gene_high_vs_low_salt.pdf",p29, units = "cm", width = 13, height = 13)
