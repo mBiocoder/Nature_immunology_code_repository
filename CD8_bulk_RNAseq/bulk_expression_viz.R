@@ -1,7 +1,8 @@
 #===================================================================================================================================#
-# Title: Vizualise top50 DEGs with heatmaps and selected genes in volcano plot
+# Title: Vizualise top50 DEGs with heatmaps, selected genes in volcano plot
+#        and pathview
 # Author: Sascha Schäuble
-# Figures: Figure 2B, Figure S5B
+# Figures: Figure 2B, Figure S5B, Figure S12
 #===================================================================================================================================#
 
 # Description: generic
@@ -14,6 +15,7 @@ library("tidyverse")
 library("magrittr")
 library("ComplexHeatmap")
 library("circlize")
+library("pathview")
 
 DATE_STR <- format(Sys.time(), "%y%m%d")
 
@@ -365,3 +367,19 @@ if (SAVE_OUT) {
 }
 # ================================================================ #
 
+
+#### pathview glycolysis ###########################################
+dat.4pv <- dat.deg$LFC_cd8_highsalt_vs_cd8_lowsalt %>% as.matrix()
+dimnames(dat.4pv) = list(dat.deg$geneid,  c("log2FC"))
+pathview(gene.data =  dat.4pv
+           , pathway.id = "00010" # Glycolysis / Gluconeogenesis
+           , species = "hsa"
+           , gene.idtype = "ENSEMBL"
+           , limit = list(gene = 3)
+           , out.suffix = paste0("pv_CD8_highVSlow_glycolysis_", DATE_STR)
+           , multi.state = F
+           , low = (gene = hcl.colors(n = 9, palette = "Blue-Red 2")[2])
+           , mid = (gene = hcl.colors(n = 9, palette = "Blue-Red 2")[5])
+           , high = (gene = hcl.colors(n = 9, palette = "Blue-Red 2")[8])
+)
+# ================================================================ #
