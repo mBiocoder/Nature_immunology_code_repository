@@ -2,7 +2,7 @@
 # Title: Vizualise top50 DEGs with heatmaps, selected genes in volcano plot
 #        and pathview
 # Author: Sascha Schäuble
-# Figures: Figure 2B, Figure S5B, Figure S12
+# Figures: Figure 2B, Supplementary Figure S5B, S12A
 #===================================================================================================================================#
 
 # Description: generic
