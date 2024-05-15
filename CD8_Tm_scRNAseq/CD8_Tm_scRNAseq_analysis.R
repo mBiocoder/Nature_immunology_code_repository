@@ -1,7 +1,7 @@
 #=============================================================================================================================#
 # Title: scRNAseq CD8 Tm high salt and low salt preprocessing and analysis
 # Author: Mahima Arunkumar
-# Figures: Figure 2 (A-G), Supplementary Figure 4, Supplementary Figure 6, Supplementary Figure 8, Supplementary Figure 10 (A)
+# Figures: 2d-g, 2i, extended data 4a-b, extended data 6a-b, extended data 8, extended data 18
 #=============================================================================================================================#
 
 
