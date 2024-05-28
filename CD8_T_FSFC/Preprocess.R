@@ -20,16 +20,6 @@ dir_create(c(pp_output_path,qc_output_path))
 
 # ========================= Preprocessing ======================================
 
-# if(optimize_per_marker){
-#   list_of_cofactors <- get_opt_b_cofactor(qn_new_ffL,
-#                                                   target_bimodality_coefficient,
-#                                                   markers_of_interest)
-# }else{
-#   print(paste0("The cofactor for all markers will be by default: ",
-#                cofactor_default))
-#   list_of_cofactors <-rep(cofactor_default, times = length(markers_of_interest))
-#   }
-
 pp_flowframes <- list()
 
 function_order <- if (pp_order == "QT") {
