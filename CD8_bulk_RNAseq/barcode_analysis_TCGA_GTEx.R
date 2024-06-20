@@ -336,6 +336,7 @@ dat.pheno.info %<>% left_join(dat.pheno.info.patientsBased %>% ungroup() %>%
 
 
 ### retrieve tcgatargetgtex expression data
+## ATTENTION: Takes up considerable space and time
 if (!file.exists(FN2)) {
   system("wget https://toil.xenahubs.net/download/TcgaTargetGtex_rsem_gene_tpm.gz")
 }
