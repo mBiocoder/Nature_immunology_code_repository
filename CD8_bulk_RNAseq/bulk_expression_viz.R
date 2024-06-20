@@ -2,7 +2,7 @@
 # Title: Vizualise top50 DEGs with heatmaps, selected genes in volcano plot
 #        and pathview
 # Author: Sascha Schäuble
-# Figures: Figure 2B, Supplementary Figure S5B, S12A
+# Figures: Figure 2b, Extended Data 13a
 #===================================================================================================================================#
 
 # Description: generic
@@ -16,6 +16,8 @@ library("magrittr")
 library("ComplexHeatmap")
 library("circlize")
 library("pathview")
+
+setwd(dirname(rstudioapi::getSourceEditorContext()$path))
 
 DATE_STR <- format(Sys.time(), "%y%m%d")
 
@@ -350,7 +352,10 @@ sel_genes <- c(
   "IL7R",
   "LTA",
   "HK1",
-  "HK2"
+  "HK2",
+  "MYC", 
+  "HIF1A", 
+  "CD24"
 )
 volc_data %<>%
   mutate(Labels = case_when(
