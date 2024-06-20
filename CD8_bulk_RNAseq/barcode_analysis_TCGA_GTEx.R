@@ -1,7 +1,7 @@
 #===================================================================================================================================#
 # Title: Compare bulk RNAseq CD8+ CD45RA- T cells against public TCGA-GTEx data
 # Author: Sascha Schäuble
-# Figures: Figure 1D, Supplementary Figure S1
+# Figures: Figure 1d, Extended Figure 1
 #===================================================================================================================================#
 
 #### config ########################################################
@@ -23,7 +23,6 @@ FN2 <- "TcgaTargetGtex_rsem_gene_tpm.gz"
 FN3 <- "TcgaTargetGTEX_phenotype.txt.gz"
 FN4 <- "cd8_salt_diff_expression.csv"
 
-source("src/funs.R")
 # ================================================================ #
 
 
@@ -142,26 +141,6 @@ getMyBarcode <-
   }
 # ================================================================ #
 
-
-
-#
-#### Description: simple helper function
-#
-# OUT:
-#   sorted (named) gene vector 
-#
-get_scaled_deframe <- function(df = expr.all.mean.df, description) {
-  
-  geneList.sorted <- df %>% filter(dataDescr == description) %>%
-    dplyr::select(gene, meanExprCount) %>%
-    arrange(desc(meanExprCount)) %>%
-    deframe() %>%
-    scale(scale = T, center = T) %>% dplyr::as_tibble(rownames = "symbol") %>%
-    deframe()
-  
-  return(geneList.sorted)
-}
-# ================================================================ #
 
 
 #
@@ -286,7 +265,7 @@ get_meanExpr <-
 #### Data wrangling ################################################
 ### data download
 ## retrieve tcgatargetgtex pheno data
-if (!file.exists("TcgaTargetGTEX_phenotype.txt.gz")) {
+if (!file.exists(FN3)) {
   system("wget https://toil.xenahubs.net/download/TcgaTargetGTEX_phenotype.txt.gz")
 } 
 dat.pheno <- read_tsv(FN3, col_types = c("cffffff"))
@@ -327,10 +306,37 @@ dat.pheno %<>% filter(!(
   )
 ))
 
+# add information about patient id
+dat.pheno %<>% mutate(patientID = sample) %>% relocate(patientID, .after = sample)
+dat.pheno %<>% mutate(
+  patientID = if_else(
+    dat.pheno$sample_type != "Normal Tissue",
+    dat.pheno$sample %>% str_remove("-[0-9]{2}$"),
+    dat.pheno$sample %>% str_extract("^GTEX-[^-]+")
+  )
+)
+
+# n over site and types
+dat.pheno.info <-
+  dat.pheno %>% group_by(primary_site, sample_type) %>%
+  dplyr::summarise(n = dplyr::n())
+dat.pheno$primary_site %<>% str_replace_all(" ", "_") %>% as_factor() %>% fct_drop()
+dat.pheno.info %<>% mutate(descr = paste(primary_site, sample_type, sep = "_") %>%
+                             str_replace_all(" ", "_"))
+dat.pheno.info.patientsBased <- dat.pheno %>%
+  dplyr::select(patientID, primary_site, sample_type) %>% distinct() %>%
+  group_by(primary_site, sample_type) %>%
+  dplyr::summarise(n_Patients = dplyr::n())
+dat.pheno.info.patientsBased %<>%
+  mutate(descr = paste(primary_site, sample_type, sep = "_") %>%
+           str_replace_all(" ", "_"))
+dat.pheno.info %<>% left_join(dat.pheno.info.patientsBased %>% ungroup() %>%
+                                dplyr::select(n_Patients, descr),
+                              by = "descr")
 
 
 ### retrieve tcgatargetgtex expression data
-if (!file.exists("TcgaTargetGTEX_phenotype.txt.gz")) {
+if (!file.exists(FN2)) {
   system("wget https://toil.xenahubs.net/download/TcgaTargetGtex_rsem_gene_tpm.gz")
 }
 dat.map <- read_tsv(FN1)
@@ -402,7 +408,9 @@ expr.all.mean.df$site %<>% str_remove("_$") %>% fct_drop()
 expr.all.mean.df$site %<>% fct_recode(Adrenal_Gland = "Adrenal_gland") %>% 
   fct_drop()
 expr.all.mean.df %>% summary()
-expr.all.mean.df %<>% left_join(dat.map %>% select(id, gene), by = c("sample" = "id")) 
+expr.all.mean.df %<>% left_join(dat.map %>% select(id, gene) %>% 
+                                  mutate(id = id %>% str_remove("\\.[0-9]+$")), 
+                                  by = c("sample" = "id")) 
 
 # ================================================================ #
 
@@ -415,44 +423,14 @@ tissues2consider <-
 dat.pheno %<>% filter(primary_site %in% tissues2consider)
 dat.pheno$primary_site %<>% fct_drop()
 
-# add information about patient id
-dat.pheno %<>% mutate(patientID = sample) %>% relocate(patientID, .after = sample)
-dat.pheno %<>% mutate(
-  patientID = if_else(
-    dat.pheno$sample_type != "Normal Tissue",
-    dat.pheno$sample %>% str_remove("-[0-9]{2}$"),
-    dat.pheno$sample %>% str_extract("^GTEX-[^-]+")
-  )
-)
+
 if (SAVE_OUT) {
   dat.pheno %>%
-    write_tsv(file = paste0(RES_PATH, "xena_infoSamples_", DATE_STR, ".tsv"))
-}
-
-
-# n over site and types
-dat.pheno.info <-
-  dat.pheno %>% group_by(primary_site, sample_type) %>%
-  dplyr::summarise(n = dplyr::n())
-dat.pheno$primary_site %<>% str_replace_all(" ", "_") %>% as_factor() %>% fct_drop()
-dat.pheno.info %<>% mutate(descr = paste(primary_site, sample_type, sep = "_") %>%
-                             str_replace_all(" ", "_"))
-dat.pheno.info.patientsBased <- dat.pheno %>%
-  dplyr::select(patientID, primary_site, sample_type) %>% distinct() %>%
-  group_by(primary_site, sample_type) %>%
-  dplyr::summarise(n_Patients = dplyr::n())
-dat.pheno.info.patientsBased %<>%
-  mutate(descr = paste(primary_site, sample_type, sep = "_") %>%
-           str_replace_all(" ", "_"))
-dat.pheno.info %<>% left_join(dat.pheno.info.patientsBased %>% ungroup() %>%
-                                dplyr::select(n_Patients, descr),
-                              by = "descr")
-dat.pheno.info %>% print(n = 64)
-
-if (SAVE_OUT) {
+    write_tsv(file = "xena_infoSamples.tsv")
   dat.pheno.info %>%
-    write_tsv(file = paste0(RES_PATH, "xena_infoSampleNo.tsv"))
+    write_tsv(file = "xena_infoSampleNo.tsv")
 }
+
 # ================================================================ #
 
 
@@ -495,10 +473,11 @@ dat.pheno %>% filter(primary_site == "Breast") %>% summary()
 
 expr.log2fc.mean.breast.tumorVSnormalAll <- get_fc(cond1 = "Breast_Primary_Tumor",
                                                      cond2 = c("Breast_normalAll"))
-expr.log2fc.mean.breast.tumorVSnormalAll$sample %<>% str_remove(".[0-9]+$")
+expr.log2fc.mean.breast.tumorVSnormalAll$sample %<>% str_remove("\\.[0-9]+$")
 
-n = n_salt_up # use alle upregulated DEGs
+n = n_salt_up # use all upregulated DEGs
 
+set.seed(17)
 p.breast <- getMyBarcode(pathway = getTopSaltGenes(df = dat.salt.upDEGs, 
                                                    n = n, id = "ensembl"),
                         stats = ( expr.log2fc.mean.breast.tumorVSnormalAll %>%
@@ -516,7 +495,7 @@ p.breast <- getMyBarcode(pathway = getTopSaltGenes(df = dat.salt.upDEGs,
                                      sample_type != "Primary Tumor"
                                  ) %>%
                                  pull(n_Patients) %>% sum() ),
-                        scoreType = "neg",
+                        scoreType = "pos",
                         maxGS = 4000,
                         minGS = 10,
                         nPerm = 1e4,
@@ -528,14 +507,15 @@ if (SAVE_OUT) {
   p.breast %>%
     cowplot::save_plot(
       filename = paste0(
-        "breast/log2fc_n",
+        "breast_log2fc_n",
         n,
         "_tumorVSnormalAll_",
         "barcode_",
         DATE_STR,
         ".pdf"
       ),
-      base_height = 6
+      base_height = 6,
+      base_asp = 0.9
     )
 }
 # ================================================================ #
@@ -555,8 +535,9 @@ for (i in 1:length(tissues2consider)) {
       cond1 = paste0(tissues2consider[i], "_Primary_Tumor"),
       cond2 = paste0(tissues2consider[i], "_normalAll")
     )
-  expr.log2fc.dummy$sample %<>% str_remove(".[0-9]+$")
+  expr.log2fc.dummy$sample %<>% str_remove("\\.[0-9]+$")
   
+  set.seed(17)
   plots.tissues[[tissues2consider[i]]] <- getMyBarcode(
     pathway = getTopSaltGenes(df = dat.salt.upDEGs,
                               n = n, id = "ensembl"),
@@ -594,7 +575,7 @@ p.cow <- cowplot::plot_grid(plotlist = plots.tissues, align = "hv",
                             ncol = 4
                             )
 save_plot(plot = p.cow, filename = 
-            paste0(RES_PATH, "non_breast/facetted_exp1_", DATE_STR, ".pdf"),
+            paste0("non_breast_facetted_exp1_", DATE_STR, ".pdf"),
           base_asp = 1/(sqrt(2)),
           base_height = 30
           )
