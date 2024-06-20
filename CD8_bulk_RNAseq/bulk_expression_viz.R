@@ -2,7 +2,7 @@
 # Title: Vizualise top50 DEGs with heatmaps, selected genes in volcano plot
 #        and pathview
 # Author: Sascha Schäuble
-# Figures: Figure 2B, Supplementary Figure S5B, S12A
+# Figures: Figure 2b, Extended Data 5b, Extended Data 13a
 #===================================================================================================================================#
 
 # Description: generic
@@ -16,6 +16,8 @@ library("magrittr")
 library("ComplexHeatmap")
 library("circlize")
 library("pathview")
+
+setwd(dirname(rstudioapi::getSourceEditorContext()$path))
 
 DATE_STR <- format(Sys.time(), "%y%m%d")
 
@@ -290,6 +292,52 @@ dat.expr.top$dn50 <- dat.expr.signif %>% filter(ensembl_ID %in% degs.top$negTop5
 
 # ================================================================ #
 
+#### Volcano plot ##################################################
+volc_data <- dat.deg %>%
+  dplyr::select(genename, LFC_cd8_highsalt_vs_cd8_lowsalt, FDR_cd8_highsalt_vs_cd8_lowsalt) %>%
+  dplyr::rename("logFC" = "LFC_cd8_highsalt_vs_cd8_lowsalt", "adj.P.Val" = "FDR_cd8_highsalt_vs_cd8_lowsalt") %>%
+  mutate(DEG = case_when(
+    abs(logFC) >= FC_CUTOFF & adj.P.Val < PVAL_CUTOFF ~ TRUE,
+    TRUE ~ FALSE
+  )) %>%
+  mutate(Status = case_when(
+    DEG == TRUE & logFC >= FC_CUTOFF ~ "up-regulated",
+    DEG == TRUE & logFC <= -FC_CUTOFF ~ "down-regulated",
+    TRUE ~ "no significant change"
+  ))
+
+sel_genes <- c(
+  "SLC5A3",
+  "SLC35F3",
+  "SLC12A8",
+  "SLC29A1",
+  "SGK1",
+  "BATF3",
+  "SLC7A5",
+  "IRF4",
+  "IL7R",
+  "LTA",
+  "HK1",
+  "HK2",
+  "MYC", 
+  "HIF1A", 
+  "CD24"
+)
+volc_data %<>%
+  mutate(Labels = case_when(
+    genename %in% sel_genes ~ genename,
+    TRUE ~ NA_character_
+  ))
+volc_data %>% filter(!is.na(Labels))
+
+### draw volcano plots 
+p.volc <- get_volc(volc_data, padding = 0.35, font_size = 24)
+if (SAVE_OUT) {
+  p.volc %>%
+    ggsave(filename = paste0("deg_volc", "_", DATE_STR, ".pdf"), width = 9, height = 9)
+}
+# ================================================================ #
+
 #### heatmaps top50 ################################################
 
 ### up 50
@@ -320,50 +368,6 @@ if (SAVE_OUT) {
   )
   draw(p.degs.dn50)
   dev.off()
-}
-# ================================================================ #
-
-
-#### Volcano plot ##################################################
-volc_data <- dat.deg %>%
-  dplyr::select(genename, LFC_cd8_highsalt_vs_cd8_lowsalt, FDR_cd8_highsalt_vs_cd8_lowsalt) %>%
-  dplyr::rename("logFC" = "LFC_cd8_highsalt_vs_cd8_lowsalt", "adj.P.Val" = "FDR_cd8_highsalt_vs_cd8_lowsalt") %>%
-  mutate(DEG = case_when(
-    abs(logFC) >= FC_CUTOFF & adj.P.Val < PVAL_CUTOFF ~ TRUE,
-    TRUE ~ FALSE
-  )) %>%
-  mutate(Status = case_when(
-    DEG == TRUE & logFC >= FC_CUTOFF ~ "up-regulated",
-    DEG == TRUE & logFC <= -FC_CUTOFF ~ "down-regulated",
-    TRUE ~ "no significant change"
-  ))
-
-sel_genes <- c(
-  "SLC5A3",
-  "SLC35F3",
-  "SLC12A8",
-  "SLC29A1",
-  "SGK1",
-  "BATF3",
-  "SLC7A5",
-  "IRF4",
-  "IL7R",
-  "LTA",
-  "HK1",
-  "HK2"
-)
-volc_data %<>%
-  mutate(Labels = case_when(
-    genename %in% sel_genes ~ genename,
-    TRUE ~ NA_character_
-  ))
-volc_data %>% filter(!is.na(Labels))
-
-### draw volcano plots 
-p.volc <- get_volc(volc_data, padding = 0.35, font_size = 24)
-if (SAVE_OUT) {
-  p.volc %>%
-    ggsave(filename = paste0("deg_volc", "_", DATE_STR, ".pdf"), width = 9, height = 9)
 }
 # ================================================================ #
 
