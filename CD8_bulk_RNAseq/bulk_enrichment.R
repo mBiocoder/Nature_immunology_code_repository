@@ -1,7 +1,7 @@
 #===================================================================================================================================#
 # Title: Perform enrichment analysis with bulk RNA seq data
 # Author: Sascha Schäuble
-# Figures: Figure 4A,H, Supplementary Figure S12B 
+# Figures: Figure 4a,h,q, Extended Data 13b 
 #===================================================================================================================================#
 
 
@@ -21,15 +21,12 @@ library("fgsea")
 library("limma")
 library("org.Hs.eg.db")
 
-
-
-
-
 DATE_STR <- format(Sys.time(), "%y%m%d")
 
 FN1 <- "cd8_salt_cd8_highsalt_vs_cd8_lowsalt_diff_expression.csv"
 FN2 <- "cd8_salt_diff_expression.csv"
-FN3 <- "revigo_ora_upGOBP_mitos_230418.tsv" # REVIGO reduction using 0.5 with 
+FN3 <- "revigo_ora_upGOBP_mitos.tsv" # REVIGO reduction using 0.5 with 
+FN4.mTOR <- "msigdb_HALLMARK_MTORC1_SIGNALING.v2023.2.Hs_genelist.tsv"
 
 # configs
 SAVE_OUT <- F
@@ -314,6 +311,10 @@ dat.DEG.down <-
     FDR_cd8_highsalt_vs_cd8_lowsalt
   ) %>% arrange(desc(LFC_cd8_highsalt_vs_cd8_lowsalt))
 
+
+# hallmark mTOR
+ids.hallmark.mTORC1 <- read_tsv(FN4.mTOR, col_names = F) 
+
 # get genes for KEGG pathways
 dat.kegg <- limma::getGeneKEGGLinks(species="hsa")
 dat.kegg$Symbol <- mapIds(org.Hs.eg.db, dat.kegg$GeneID,
@@ -407,7 +408,7 @@ if (SAVE_OUT) {
 
 #### barplot | highlighted metabolism ##############################
 dat.clPrGSEA.up_KEGG.signif <-
-  ora.tibble[["up_KEGG"]] %>% filter(qvalue <= 0.05)
+  ora.tibble %>% filter(category == "up_KEGG") %>% filter(qvalue <= 0.05)
 kegg.mb <-
   c(
     "hsa00010",
@@ -480,7 +481,30 @@ if (SAVE_OUT) {
 # ================================================================ #
 
 
-#### barcode | glycolysis, GSEA ####################################
+#### barcode, GSEA | hallmark mTORC1 (M5924) #######################
+dat.hallmark.mTORC1.ext <- dat.expr.stats %>% dplyr::select(geneid, genename) %>% 
+  filter(genename %in% ids.hallmark.mTORC1$X1)
+
+# ATTENTION: duplicates throw an error down the road
+dat.hallmark.mTORC1.ext %>% distinct()
+
+n = (dat.hallmark.mTORC1.ext %>% dim())[1]
+set.seed(17)
+p.hallmark.mTORC1 <- getMyBarcode(pathway = getTopSaltGenes(df = dat.hallmark.mTORC1.ext, n = n, id = "geneid"),
+                                  stats = ( dat.expr.geneList.ensembl ),
+                                  scoreType = "pos",
+                                  maxGS = 4000,
+                                  minGS = 10, nPerm = 1e4,
+                                  title = "MSIGDB; hallmark.mTORC1 (M5924)"
+                                  
+)
+p.hallmark.mTORC1 %>% 
+  cowplot::save_plot(filename = paste0("mTOR_MSIGDB_M5924_barcode_", DATE_STR, ".pdf"), base_height = 6)
+
+# ================================================================ #
+
+
+#### barcode, GSEA | glycolysis ####################################
 
 ### KEGG
 # using fgsea
@@ -490,6 +514,7 @@ dat.glycolysis <- pickTopGenes(df = dat.kegg %>%
                                  distinct(),
                                criteria = "LFC_cd8_highsalt_vs_cd8_lowsalt")
 n = (dat.glycolysis %>% dim())[1]
+set.seed(48) # NES = 2.47, p = 0.00339
 p.glycolysis <- getMyBarcode(pathway = getTopSaltGenes(df = dat.glycolysis, n = n, id = "geneid"),
                              stats = ( dat.expr.geneList.ensembl ),
                              scoreType = "pos",
@@ -498,12 +523,12 @@ p.glycolysis <- getMyBarcode(pathway = getTopSaltGenes(df = dat.glycolysis, n = 
                              title = "KEGG glycolysis (ID hsa00010)"
                              
 )
+p.glycolysis
 
 if (SAVE_OUT) {
   p.glycolysis %>%
     cowplot::save_plot(
-      filename = paste0("KEGGpwys/",
-                        "glycolysis_n",
+      filename = paste0("glycolysis_n",
                         n,
                         "_barcode_",
                         DATE_STR,
