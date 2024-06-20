@@ -1,7 +1,7 @@
 #===================================================================================================================================#
 # Title: Perform enrichment analysis with bulk RNA seq data
 # Author: Sascha Schäuble
-# Figures: Figure 4A,H, Supplementary Figure S12B 
+# Figures: Figure 4a,h, Supplementary Figure S12B 
 #===================================================================================================================================#
 
 
@@ -29,7 +29,7 @@ DATE_STR <- format(Sys.time(), "%y%m%d")
 
 FN1 <- "cd8_salt_cd8_highsalt_vs_cd8_lowsalt_diff_expression.csv"
 FN2 <- "cd8_salt_diff_expression.csv"
-FN3 <- "revigo_ora_upGOBP_mitos_230418.tsv" # REVIGO reduction using 0.5 with 
+FN3 <- "revigo_ora_upGOBP_mitos.tsv" # REVIGO reduction using 0.5 with 
 
 # configs
 SAVE_OUT <- F
@@ -407,7 +407,7 @@ if (SAVE_OUT) {
 
 #### barplot | highlighted metabolism ##############################
 dat.clPrGSEA.up_KEGG.signif <-
-  ora.tibble[["up_KEGG"]] %>% filter(qvalue <= 0.05)
+  ora.tibble %>% filter(category == "up_KEGG") %>% filter(qvalue <= 0.05)
 kegg.mb <-
   c(
     "hsa00010",
@@ -490,6 +490,7 @@ dat.glycolysis <- pickTopGenes(df = dat.kegg %>%
                                  distinct(),
                                criteria = "LFC_cd8_highsalt_vs_cd8_lowsalt")
 n = (dat.glycolysis %>% dim())[1]
+set.seed(48) # NES = 2.47, p = 0.00339
 p.glycolysis <- getMyBarcode(pathway = getTopSaltGenes(df = dat.glycolysis, n = n, id = "geneid"),
                              stats = ( dat.expr.geneList.ensembl ),
                              scoreType = "pos",
@@ -498,12 +499,12 @@ p.glycolysis <- getMyBarcode(pathway = getTopSaltGenes(df = dat.glycolysis, n = 
                              title = "KEGG glycolysis (ID hsa00010)"
                              
 )
+p.glycolysis
 
 if (SAVE_OUT) {
   p.glycolysis %>%
     cowplot::save_plot(
-      filename = paste0("KEGGpwys/",
-                        "glycolysis_n",
+      filename = paste0("glycolysis_n",
                         n,
                         "_barcode_",
                         DATE_STR,
