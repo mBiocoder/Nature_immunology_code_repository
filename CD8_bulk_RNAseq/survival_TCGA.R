@@ -1,7 +1,7 @@
 #===================================================================================================================================#
 # Title: survival analysis by Kaplan-Meier analysis using TCGA data
 # Author: Sascha Schäuble
-# Figures: Figure 6h, Extended Data 6i, Extended Data 23d
+# Figures: Figure 6h, Extended Figure 6i, Extended Figure 23d
 #===================================================================================================================================#
 
 library("tidyverse")

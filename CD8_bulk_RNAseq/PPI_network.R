@@ -1,7 +1,7 @@
 #===================================================================================================================================#
 # Title: mTOR interaction network analysis with bulk RNA seq data and BIOGRID PPI information
 # Author: Sascha Schäuble
-# Figures: Extended Data 17b 
+# Figures: Extended Figure 17b 
 #===================================================================================================================================#
 
 library("tidyverse")
