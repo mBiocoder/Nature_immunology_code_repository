@@ -4,12 +4,12 @@
 - Differential_pseudotime_velocity_analysis.ipynb: scRNAseq CD8 Tm high salt and low salt dpt and velocity analysis; Expected runtime is 1.5h.
 ## Software Requirements
 ### Python
-- scanpy                    [1.9.5]
-- scipy                     [1.9.3]
-- scrublet                  [0.2.3]
-- gseapy                    [1.0.2]
-- celltypist                [1.3.0]
-- anndata                   [0.9.2]
+- scanpy   [1.9.5]
+- scipy    [1.9.3]
+- scrublet [0.2.3]
+- gseapy   [1.0.2]
+- celltypist [1.3.0]
+- anndata  [0.9.2]
 ### R
 - dplyr                     [1.1.2]
 - ggpubr                    [0.6.0]
