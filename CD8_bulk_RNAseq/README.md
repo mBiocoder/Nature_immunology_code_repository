@@ -78,4 +78,4 @@
 - Each CD8_bulk_RNAseq scripts relevant script and dependent data can be sourced and produce output including figures and tables that were produced as results of the manuscript.
 - Comments are included to describe the intention of the script.
 - If included, seeds need to be left untouched to reproduce results of the manuscript.
-
+- The expected runtime ranges from less than a minute to more than 30 min depending on machine resources and whether data is re-processed or used from the available RData structures.
