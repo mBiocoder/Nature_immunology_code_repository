@@ -1,5 +1,5 @@
 #===================================================================================================================================#
-# Title: survival analysis by KaplanMeier analysis using TCGA data
+# Title: survival analysis by Kaplan-Meier analysis using TCGA data
 # Author: Sascha Schäuble
 # Figures: Figure 6h, Extended Data 6i, Extended Data 23d
 #===================================================================================================================================#
@@ -34,7 +34,8 @@ FN1 <- "gencode.v23.annotation.gene.probemap"
 #'
 #' @return variables
 refresh_base_config <- function() {
-  PROJ_PATH <<- "/home/schaeuble/projects/funginet_inf/C7_Zielinski/EX0009/"
+  PROJ_PATH <<-
+    "/home/schaeuble/projects/funginet_inf/C7_Zielinski/EX0009/"
   DAT_PATH <<- paste0(PROJ_PATH, "dat/")
   RES_PATH <<- paste0(PROJ_PATH, "res/goi/ATP1A1/")
   
@@ -55,51 +56,39 @@ refresh_base_config <- function() {
 #' @param DATA df used for creating the fit
 #' @param P char p value of computed survival or T to use default
 #' @param PMETH char method to compute survival or T to use default
-#' 
+#'
 #'
 #' @return ggsurvplot obj
-#' 
-get_km_plot <- function(sfitObj, TITLE, SUBTITLE=NULL, 
-                        CAPTION=NULL, LEGENDTITLE=NULL,LEGENDLABS=NULL, XLAB, DATA, 
-                        P=T, PMETH=T, CENSOR = F) {
-  # print(DATA)
+#'
+get_km_plot <- function(sfitObj,
+                        TITLE,
+                        SUBTITLE = NULL,
+                        CAPTION = NULL,
+                        LEGENDTITLE = NULL,
+                        LEGENDLABS = NULL,
+                        XLAB,
+                        DATA,
+                        P = T,
+                        PMETH = T,
+                        CENSOR = F) {
   p <-
-    ggsurvplot(fit = sfitObj,
-               title = TITLE,
-               # subtitle = SUBTITLE,
-               # caption = CAPTION,
-               legend.title = LEGENDTITLE,
-               legend.labs = LEGENDLABS,
-               # conf.int=TRUE,
-               # pval=TRUE,
-               pval.method = T,
-               pval = P,
-               # pval.method = PMETH,
-               risk.table= "abs_pct",
-               risk.table.y.text = T,
-               risk.table.height = 0.2,
-               # cumevents =T,
-               # palette=hcl.colors(n = sfitObj %>% dim(), palette = "viridis"),
-               palette=c("black", "black"),
-               linetype = c("solid", "dashed"),
-               # fun = "event",
-               # color = "black",
-               # risk.table.y.text.col = TRUE,
-               # surv.median.line = "hv",
-               xlab = XLAB, 
-               data = DATA,
-               # legend = "none",
-               # xscale = "d_y",
-               # break.x.by = 365.25, # years
-               # break.x.by = 500, # days
-               # xlim = c(0,365.25),
-               # xlim = c(0,1000),
-               censor = CENSOR,
-               # adjust the plotting xlim, such that we have sufficient space to the right:
-               xlim = c(0, (sfitObj$time %>% max())),
-               # xlim = c(0, (sfitObj$time %>% max()) + (500 - (sfitObj$time %>% max()) %% 500) ),
-               # ggtheme = theme_bw()
-               ggtheme = theme_pubr()
+    ggsurvplot(
+      fit = sfitObj,
+      title = TITLE,
+      legend.title = LEGENDTITLE,
+      legend.labs = LEGENDLABS,
+      pval.method = T,
+      pval = P,
+      risk.table = "abs_pct",
+      risk.table.y.text = T,
+      risk.table.height = 0.2,
+      palette = c("black", "black"),
+      linetype = c("solid", "dashed"),
+      xlab = XLAB,
+      data = DATA,
+      censor = CENSOR,
+      xlim = c(0, (sfitObj$time %>% max())),
+      ggtheme = theme_pubr()
     )
   
   return(p)
@@ -107,7 +96,7 @@ get_km_plot <- function(sfitObj, TITLE, SUBTITLE=NULL,
 # ================================================================ #
 
 #'
-#' @description: provide all necessary data as list; of note, different time formats 
+#' @description: provide all necessary data as list; of note, different time formats
 #' and censored data are compared correctly as of 240201
 #'
 #' @param df data frame: base data frame with "os" column for survival (1 dead, 0 alive)
@@ -117,11 +106,12 @@ get_km_plot <- function(sfitObj, TITLE, SUBTITLE=NULL,
 get_KM_data <- function(df, COLS, MINPROP = 0.1, FACTOR) {
   dat.km <- list()
   
-  statusTimeMap <- c("os_time" = "os",
-                     "new_tumor_event_dx_days_to" = "os",
-                     "dss_time" = "dss",
-                     "dfi_time" = "dfi",
-                     "pfi_time" = "pfi"
+  statusTimeMap <- c(
+    "os_time" = "os",
+    "new_tumor_event_dx_days_to" = "os",
+    "dss_time" = "dss",
+    "dfi_time" = "dfi",
+    "pfi_time" = "pfi"
   )
   
   for (c in COLS) {
@@ -132,17 +122,21 @@ get_KM_data <- function(df, COLS, MINPROP = 0.1, FACTOR) {
       dplyr::select(all_of(c(
         # c, "tumor_status", "os", "nfat5", "sgk1"
         c, "tumor_status", statusTimeMap[c] %>% unname, FACTOR
-      ))) %>% 
+      ))) %>%
       rename("os" = (statusTimeMap[c] %>% unname))
     dat.km[[c]] <- dat.km[[c]] %>% cbind(
-      surv_categorize(x = surv_cutpoint(data = dat.km[[c]],
-                                        time = c,
-                                        event = "os",
-                                        variables = c(FACTOR),
-                                        minprop = MINPROP), 
-                      variables = c(FACTOR), 
-                      labels = c("low", "high")) %>% 
-        as_tibble() %>% 
+      surv_categorize(
+        x = surv_cutpoint(
+          data = dat.km[[c]],
+          time = c,
+          event = "os",
+          variables = c(FACTOR),
+          minprop = MINPROP
+        ),
+        variables = c(FACTOR),
+        labels = c("low", "high")
+      ) %>%
+        as_tibble() %>%
         dplyr::select(c(FACTOR)) %>% dplyr::rename("optCut" = FACTOR)
     )
   }
@@ -158,17 +152,17 @@ get_KM_data <- function(df, COLS, MINPROP = 0.1, FACTOR) {
 #' @param LIST.DF list of data frame: filtered datasets to run analysis with; name of list items will influence results labels
 #' @param SAVE
 #' @param RES_PATH
-#' @param RES_SUB_PATH
+#' @param PREFIX
 #' @param SURVCUT
-#' 
+#'
 #'
 #' @return list of sfit and p.surv fit list objects
-#' 
+#'
 get_km_analysis <- function(LIST.DF,
                             SAVE = F,
                             SAVEPNG = F,
                             RES_PATH = "./",
-                            RES_SUB_PATH = "",
+                            PREFIX = "",
                             METHOD = "survdiff",
                             WTumSTATUS = F,
                             SURVCUT = c(500, 1000, 2000, 10000),
@@ -205,16 +199,16 @@ get_km_analysis <- function(LIST.DF,
       
       ### Optimal cutoff as provided by surv_cutpoint
       # only expression status
-        sfit[[paste(c, FACTOR, "_optCut", i, sep = "_")]] <-
-          survfit(Surv(
-            time = dummyTime,
-            event = os,
-            type = "right"
-          ) ~ optCut,
-          data = dummy)
+      sfit[[paste(c, FACTOR, "_optCut", i, sep = "_")]] <-
+        survfit(Surv(
+          time = dummyTime,
+          event = os,
+          type = "right"
+        ) ~ optCut,
+        data = dummy)
       
-        survdiff(Surv(dummyTime, os) ~ optCut, data = dummy)
-    
+      survdiff(Surv(dummyTime, os) ~ optCut, data = dummy)
+      
       sfit.stats[[paste(c, FACTOR, "_optCut", i, sep = "_")]] <-
         survminer::surv_pvalue(fit = sfit[[paste(c, FACTOR, "_optCut", i, sep = "_")]],
                                method = METHOD,
@@ -239,14 +233,12 @@ get_km_analysis <- function(LIST.DF,
       if (WTumSTATUS) {
         dummy %<>% drop_na(any_of(c("tumor_status")))
         sfit[[paste(c, FACTOR, "_optCut_wTStat", i, sep = "_")]] <-
-          survfit(
-            Surv(
-              time = dummyTime,
-              event = os,
-              type = "right"
-            ) ~ optCut + tumor_status,
-            data = dummy
-          )
+          survfit(Surv(
+            time = dummyTime,
+            event = os,
+            type = "right"
+          ) ~ optCut + tumor_status,
+          data = dummy)
         sfit.stats[[paste(c, FACTOR, "_optCut_wTStat", i, sep = "_")]] <-
           survminer::surv_pvalue(fit = sfit[[paste(c, FACTOR, "_optCut_wTStat", i, sep = "_")]],
                                  method = METHOD,
@@ -275,27 +267,35 @@ get_km_analysis <- function(LIST.DF,
     print("Saving result stats...")
     write_xlsx(
       x = rbindlist(sfit.stats, idcol = "mode"),
-      path = paste0(RES_PATH,
-                    RES_SUB_PATH,
-                    "km_", FACTOR, "_",
-                    DATE_STR,
-                    ".xlsx")
+      path = paste0(
+        RES_PATH,
+        PREFIX,
+        "km_",
+        FACTOR,
+        "_",
+        DATE_STR,
+        ".xlsx"
+      )
     )
     print("Saving result plots...")
     ggexport(
       plotlist = p.surv,
-      filename = paste0(RES_PATH, RES_SUB_PATH, "km_", FACTOR, "_", DATE_STR, ".pdf"),
+      filename = paste0(RES_PATH, PREFIX, "km_", FACTOR, "_", DATE_STR, ".pdf"),
       width = WIDTH,
       height = HEIGHT
     )
     if (SAVEPNG) {
       ggexport(
         plotlist = p.surv,
-        filename = paste0(RES_PATH,
-                          RES_SUB_PATH,
-                          "km_", FACTOR, "_",
-                          DATE_STR,
-                          ".png"),
+        filename = paste0(
+          RES_PATH,
+          PREFIX,
+          "km_",
+          FACTOR,
+          "_",
+          DATE_STR,
+          ".png"
+        ),
         width = 1200,
         height = 800
       )
@@ -312,47 +312,50 @@ get_km_analysis <- function(LIST.DF,
 #' @param variables
 #'
 #' @return variables
-merge_meta <- function(DF = dat.expr, PHENO = dat.pheno, SURV = dat.survival) {
-  dat.expr.long <-
-    DF %>% dplyr::rename("ensembl" = "sample") %>%
-    pivot_longer(-c(ensembl, gene), names_to = "sample") %>%
-    dplyr::select(-ensembl) %>%
-    pivot_wider(names_from = gene, values_from = value)
-  # add metadata
-  dat.expr.long.ext <- dat.expr.long %>% left_join(
-    PHENO %>%
-      dplyr::select(sample, patientID,
-                    study, primary_site, sample_type, gender),
-    by = "sample"
-  ) %>%
-    # relocate(value, .after = gene) %>%
-    left_join(
-      SURV %>%
-        dplyr::select(
-          sample,
-          `cancer type abbreviation`,
-          age_at_initial_pathologic_diagnosis,
-          ajcc_pathologic_tumor_stage,
-          vital_status,
-          OS,
-          DSS,
-          DFI,
-          DFI,
-          PFI,
-          tumor_status,
-          new_tumor_event_dx_days_to,
-          treatment_outcome_first_course,
-          OS.time,
-          DSS.time,
-          DFI.time,
-          PFI.time
-        ),
+merge_meta <-
+  function(DF = dat.expr,
+           PHENO = dat.pheno,
+           SURV = dat.survival) {
+    dat.expr.long <-
+      DF %>% dplyr::rename("ensembl" = "sample") %>%
+      pivot_longer(-c(ensembl, gene), names_to = "sample") %>%
+      dplyr::select(-ensembl) %>%
+      pivot_wider(names_from = gene, values_from = value)
+    # add metadata
+    dat.expr.long.ext <- dat.expr.long %>% left_join(
+      PHENO %>%
+        dplyr::select(sample, patientID,
+                      study, primary_site, sample_type, gender),
       by = "sample"
-    ) %>% clean_names()
-  dat.expr.long.ext$ajcc_pathologic_tumor_stage %<>% as_factor() %>% fct_relevel(sort)
-  
-  return(dat.expr.long.ext)
-}
+    ) %>%
+      # relocate(value, .after = gene) %>%
+      left_join(
+        SURV %>%
+          dplyr::select(
+            sample,
+            `cancer type abbreviation`,
+            age_at_initial_pathologic_diagnosis,
+            ajcc_pathologic_tumor_stage,
+            vital_status,
+            OS,
+            DSS,
+            DFI,
+            DFI,
+            PFI,
+            tumor_status,
+            new_tumor_event_dx_days_to,
+            treatment_outcome_first_course,
+            OS.time,
+            DSS.time,
+            DFI.time,
+            PFI.time
+          ),
+        by = "sample"
+      ) %>% clean_names()
+    dat.expr.long.ext$ajcc_pathologic_tumor_stage %<>% as_factor() %>% fct_relevel(sort)
+    
+    return(dat.expr.long.ext)
+  }
 # ================================================================ #
 
 # ================================================================ #
@@ -364,7 +367,7 @@ refresh_base_config()
 load("./survival/tcga_meta.RData")
 
 ## TCGA data from xena server will be loaded from RData files
-# these are based on data available at 
+# these are based on data available at
 # https://xenabrowser.net/datapages/?cohort=TCGA%20TARGET%20GTEx&removeHub=http%3A%2F%2F127.0.0.1%3A7222
 # including
 # https://toil-xena-hub.s3.us-east-1.amazonaws.com/download/TcgaTargetGtex_rsem_gene_tpm.gz
@@ -465,106 +468,108 @@ if (USERDATA)
 dat.expr.all <- dat.expr
 
 ## NFAT5
-dat.expr <- dat.expr.all %>% filter(sample == "ENSG00000102908") %>% 
-  mutate(gene = if(sample == "ENSG00000102908") "NFAT5")
+dat.expr <-
+  dat.expr.all %>% filter(sample == "ENSG00000102908") %>%
+  mutate(gene = if (sample == "ENSG00000102908")
+    "NFAT5")
 
-dat.expr.panc <- merge_meta(DF = dat.expr) %>% dplyr::filter(primary_site == "Pancreas") %>% 
-  drop_na(nfat5) %>% 
+dat.expr.panc <-
+  merge_meta(DF = dat.expr) %>% dplyr::filter(primary_site == "Pancreas") %>%
+  drop_na(nfat5) %>%
   mutate(vital_status = vital_status %>% as_factor())
-## PAAD | tumor | with tumor
+
 dat.expr.panc %>%
   filter(sample_type == "Primary Tumor") %>%
   filter(tumor_status == "WITH TUMOR") %>%
-  group_by(sample_type,vital_status,os, gender) %>% summarise(group_size = n())
+  group_by(sample_type, vital_status, os, gender) %>% summarise(group_size = n())
 
 dat.tmp <- get_KM_data(
   dat.expr.panc %>%
     filter(sample_type == "Primary Tumor") %>%
     filter(tumor_status == "WITH TUMOR"),
-  COLS = c(
-    "new_tumor_event_dx_days_to"
-  ), FACTOR = "nfat5"
+  COLS = c("new_tumor_event_dx_days_to"),
+  FACTOR = "nfat5"
 )
 
 res.surv.paad.tumor.wTum.sel <- get_km_analysis(
   LIST.DF = dat.tmp,
   METHOD = "S1",
-  SAVE = T, 
-  SURVCUT = c(10000), 
-  FACTOR = "atp1a1")
-
-
-
-
+  SAVE = T,
+  SURVCUT = c(10000),
+  FACTOR = "nfat5",
+  PREFIX = "panc_"
+)
 
 
 ## ATP1A1
-
-dat.expr <- dat.expr.all %>% filter(sample == "ENSG00000163399") %>% 
-  mutate(gene = if(sample == "ENSG00000163399") "ATP1A1")
+dat.expr <-
+  dat.expr.all %>% filter(sample == "ENSG00000163399") %>%
+  mutate(gene = if (sample == "ENSG00000163399")
+    "ATP1A1")
 dat.expr$gene
 
-dat.expr.long <-
-  dat.expr %>% dplyr::rename("ensembl" = "sample") %>%
-  pivot_longer(-c(ensembl, gene), names_to = "sample") %>%
-  dplyr::select(-ensembl) %>%
-  pivot_wider(names_from = gene, values_from = value)
-# add metadata
-dat.expr.long.ext <- dat.expr.long %>% left_join(
-  dat.pheno %>%
-    dplyr::select(sample, patientID,
-                  study, primary_site, sample_type, gender),
-  by = "sample"
-) %>%
-  # relocate(value, .after = gene) %>%
-  left_join(
-    dat.survival %>%
-      dplyr::select(
-        sample,
-        `cancer type abbreviation`,
-        age_at_initial_pathologic_diagnosis,
-        ajcc_pathologic_tumor_stage,
-        vital_status,
-        OS,
-        DSS,
-        DFI,
-        DFI,
-        PFI,
-        tumor_status,
-        new_tumor_event_dx_days_to,
-        treatment_outcome_first_course,
-        OS.time,
-        DSS.time,
-        DFI.time,
-        PFI.time
-      ),
-    by = "sample"
-  ) %>% clean_names()
-dat.expr.long.ext$ajcc_pathologic_tumor_stage %<>% as_factor() %>% fct_relevel(sort)
-
-# only pancreas
-dat.expr.panc <- dat.expr.long.ext %>% dplyr::filter(primary_site == "Pancreas") %>% 
-  drop_na(atp1a1) %>% 
+dat.expr.panc <-
+  merge_meta(DF = dat.expr) %>% dplyr::filter(primary_site == "Pancreas") %>%
+  drop_na(atp1a1) %>%
   mutate(vital_status = vital_status %>% as_factor())
-dat.expr.panc %>% group_by(study, gender, sample_type, vital_status) %>% summarise(group_size = n())
-dat.expr.panc %>% dplyr::filter(cancer_type_abbreviation == "PAAD") %>% 
-  group_by(study, gender, sample_type, vital_status) %>% 
-  summarise(group_size = n())
 
-## KM ATP1A1
+dat.expr.panc %>%
+  filter(sample_type == "Primary Tumor") %>%
+  group_by(sample_type, vital_status, os, gender) %>% summarise(group_size = n())
+
 dat.tmp <- get_KM_data(
   dat.expr.panc %>%
     filter(sample_type == "Primary Tumor"),
-  COLS = c(
-    "new_tumor_event_dx_days_to"
-  ), FACTOR = "atp1a1"
+  #%>%
+  COLS = c("new_tumor_event_dx_days_to"),
+  FACTOR = "atp1a1"
 )
 
 res.surv.panc.tumorDead.wTum.sel <- get_km_analysis(
   LIST.DF = dat.tmp,
-  METHOD = "S1", FACTOR = "atp1a1",
-  SAVE = T, 
-  SURVCUT = c(10000))
+  METHOD = "S1",
+  FACTOR = "atp1a1",
+  SAVE = T,
+  SURVCUT = c(10000),
+  PREFIX = "panc_"
+)
 
 # ================================================================ #
 
+
+#### breast cancer #################################################
+if (USERDATA)
+  load("./survival/tcga_xena_breast.RData")
+
+dat.expr <- dat.expr %>% filter(sample == "ENSG00000102908") %>%
+  mutate(gene = if (sample == "ENSG00000102908")
+    "NFAT5")
+dat.expr$gene
+
+dat.expr.breast <-
+  merge_meta(DF = dat.expr) %>% dplyr::filter(primary_site == "Breast") %>%
+  drop_na(nfat5) %>%
+  mutate(vital_status = vital_status %>% as_factor())
+
+dat.expr.breast %>%
+  filter(sample_type == "Primary Tumor") %>%
+  group_by(sample_type, vital_status, os, gender) %>% summarise(group_size = n())
+
+dat.tmp <- get_KM_data(
+  dat.expr.breast %>%
+    filter(sample_type == "Primary Tumor"),
+  #%>%
+  COLS = c("new_tumor_event_dx_days_to"),
+  FACTOR = "nfat5"
+)
+
+res.surv.panc.tumorDead.wTum.sel <- get_km_analysis(
+  LIST.DF = dat.tmp,
+  METHOD = "S1",
+  PREFIX = "breast_",
+  FACTOR = "nfat5",
+  SAVE = T,
+  SURVCUT = c(10000)
+)
+
+# ================================================================ #
