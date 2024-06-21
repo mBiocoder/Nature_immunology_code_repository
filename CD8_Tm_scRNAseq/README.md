@@ -10,6 +10,13 @@
 - gseapy   [1.0.2]
 - celltypist [1.3.0]
 - anndata  [0.9.2]
+- numpy   [1.23.5]
+- pandas  [1.5.1]
+- seaborn [0.12.1]
+- igraph [0.10.2]
+- loompy [3.0.7]
+- scvelo [0.2.5]
+- matplotlib [3.7.1]
 ### R
 - dplyr                     [1.1.2]
 - ggpubr                    [0.6.0]
