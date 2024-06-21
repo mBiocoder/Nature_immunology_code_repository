@@ -1,5 +1,5 @@
-# Folder Contents
-- CD8_Tm_salt_analysis.ipynb: includes scRNA-seq analyses of the high and low NaCl CD8$^+$ memory T cells (Fig. 3c-e; 4m-o; S. Fig. 10a, c-h)
+# Demo and instructions to use
+- CD8_Tm_salt_analysis.ipynb: includes scRNA-seq analyses of the high and low NaCl CD8$^+$ memory T cells (Fig. 3c-e; 4m-o; S. Fig. 10a, c-h). Expected run time is 1h.
 - CD8_Tm_scRNAseq_analysis.R: ...
 - Differential_pseudotime_velocity_analysis.ipynb: ...
 ## Software Requirements
