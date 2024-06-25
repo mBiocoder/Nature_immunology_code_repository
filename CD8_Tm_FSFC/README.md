@@ -13,7 +13,7 @@
 ### R package dependencies 
 
 - devtools_2.4.5
-- - BiocManager_1.30.21
+- BiocManager_1.30.21
 - mclust_6.0.0
 - scales_1.2.1
 - tibble_3.2.1
