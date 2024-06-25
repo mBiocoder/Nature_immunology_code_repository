@@ -10,7 +10,7 @@
 
 ---
 
-### R Package dependencies 
+### R package dependencies 
 
 - DT_0.33
 - ReactomePA_1.43.0
@@ -67,16 +67,69 @@
 - ggplot2_3.5.1
 - tidyverse_2.0.0
 
+- devtools
+- BiocManager
+- mclust
+- scales
+- tibble
+- multimode
+- viridis
+- plotly
+- data.table
+- tidyverse
+- ggrepel
+- rmarkdown
+- RColorBrewer
+- dplyr
+- reshape2
+- sBIC
+- Rtsne
+- ggplot2
+- diptest
+- LaplacesDemon
+- Biobase
+- diptest
+- mousetrap
+- readxl
+- magrittr
+- ggridges
+- emdist
+- plyr
+
+### Bioconductor package dependencies 
+
+- flowCore
+- FlowSOM
+- flowAI
+- PeacoQC
+- flowWorkspace
+- uwot
+- pheatmap
+- tidyr
+- ggpubr
+- ggcyto
+- flowVS
+- preprocessCore
+- flowTrans
+- harmony
+
+### Github package dependencies 
+
+- CytoExploreRData
+- CytoExploreR
+- Spectre
+- cyCombine 
+
 ## 2. Installation guide
 
 - R and RStudio can be downloaded from https://posit.co/download/rstudio-desktop/
-- The same URL hold install instructions for every operation system
-- package dependencies can be resolved by installing packages with install.packages(<Package-name>) directly or via BioConductor (instructions: https://www.bioconductor.org/install/)
+- The same URL hold install instructions for every operation system 
+- package dependencies can be resolved by installing packages with install.packages(<Package-name>) directly, via BioConductor (instructions: https://www.bioconductor.org/install/) or through devtools (https://github.com/r-lib/devtools)
 
 ## 3. Demo and instructions to use
 
-- CD8_bulk_RNAseq relevant scripts and data are available at https://doi.org/10.5281/zenodo.12201093.
-- Each CD8_bulk_RNAseq scripts relevant script and dependent data can be sourced and produce output including figures and tables that were produced as results of the manuscript.
-- Comments are included to describe the intention of the script.
+- CD8_Tm_FSFC relevant scripts and data are available at https://doi.org/10.5281/zenodo.12201093.
+- Each CD8_Tm_FSFC relevant script and dependent data can be sourced and produce output including figures and tables that were produced as results of the manuscript.
+- Comments are included to describe the intention of the script. Once all scripts are sourced, functions can be used independently provided the necessary parameters or following the main.R, providing parameters through the exemplary Parameters.R script.
 - If included, seeds need to be left untouched to reproduce results of the manuscript.
-- The expected runtime ranges from less than a minute to more than 30 min depending on machine resources and whether data is re-processed or used from the available RData structures.
+- The expected runtime ranges from 30 min to several hours depending on file sizes, machine resources and parameters.
